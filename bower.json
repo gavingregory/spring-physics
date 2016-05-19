@@ -16,6 +16,7 @@
     "tests"
   ],
   "dependencies": {
-    "three.js": "threejs#*"
+    "three.js": "threejs#*",
+    "underscore": "^1.8.3"
   }
 }

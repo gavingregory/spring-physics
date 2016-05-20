@@ -1,13 +1,3 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
-
-var renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(0xffffff, 1);
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
-
-var material = new THREE.MeshBasicMaterial( { color: 0x111199 } );
-
 /**
  * Represents an position in space.
  * @constructor
@@ -22,6 +12,16 @@ var Entity = function (position, mass) {
   this.lposition = this.position.clone();
   this.llposition = this.position.clone();
 };
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
+
+var renderer = new THREE.WebGLRenderer();
+renderer.setClearColor(0xffffff, 1);
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+
+var material = new THREE.MeshBasicMaterial( { color: 0x111199 } );
 
 /**
  * Represents a static entity.
@@ -49,8 +49,8 @@ var Spring = function (a, b, resistance, length) {
   this.length = length;
 };
 
-var spring = new Spring(new Entity(new THREE.Vector3(0,0,0), 0.5), new Entity(new THREE.Vector3(0,50,0), 0.5), 1, 50.0);
-spring.b.acceleration.set(0,0,0);
+var spring = new Spring(new Entity(new THREE.Vector3(0,0,0), 0.5), new Entity(new THREE.Vector3(0,90,0), 0.5), 1, 50.0);
+//spring.b.acceleration.set(0,0,0);
 camera.position.z = 500;
 
 // physics
@@ -58,71 +58,33 @@ camera.position.z = 500;
 var verlet = function (e, dt) {
   var position = e.position.clone();
   position.add(e.position.clone().sub(e.lposition)).add(e.acceleration.clone().multiplyScalar(dt * dt));
-  e.llposition = e.lposition;
-  e.lposition = e.position;
-  e.position = position;
+  e.llposition.copy(e.lposition);
+  e.lposition.copy(e.position);
+  e.position.copy(position);
+  e.velocity = e.position.clone().sub(e.lposition).divideScalar(dt); // inefficient to calculate this twice really!
 }
+
+
 
 // a  = Entity a
 // b  = Entity b
 // k  = Spring resistance
 // c  = Coefficient of elasticity
 // dt = Delta Time
-var elasticity = function (a, b, k, c, dt) {
-  // x = difference in current position from rest position
-  var x = spring.length - a.position.distanceTo(b.position);
-  // force
-  var f = -(k * x) - b.velocity.clone().multiplyScalar(c).length();
+var hookeForce = function (a, b, k, c, dt) {
+  var x = a.position.distanceTo(b.position) - spring.length;
+  var force = -1 * (k*x); // Hookes Law: F = -kx;
+
+  // Vab
   var vab = a.position.clone();
   vab.sub(b.position);
-  vab.multiplyScalar(f);
-  return vab;
+
+  var N = vab.clone().normalize();
+  var v = N.dot(vab);
+  force -= v*c;
+
+  return force;
 };
-
-
-
-
-
-//RK4
-var State = function (x, v) {
-  this.x = x;
-  this.v = v;
-}
-
-var Derivative = function (dx, dv) {
-  this.dx = dx ? dx : 0.0; // dx/dt = velocity
-  this.dv = dv ? dv : 0.0; // dv/dt = acceleration
-}
-
-var evaluate = function (initial, t, dt, d) {
-  var state = new State(initial.x + d.dx*dt, initial.v + d.dv*dt);
-  return new Derivative(state.v, force(state, t+dt));
-}
-
-var force = function (state, t) {
-  const k = 10;
-  const b = 1;
-  return -k * state.x - b*state.v;
-}
-
-var integrate = function (state, t, dt) {
-  var a = evaluate(state, t, 0.0, new Derivative());
-  var b = evaluate(state, t, dt*0.5, a);
-  var c = evaluate(state, t, dt*0.5, b);
-  var d = evaluate(state, t, dt, c);
-
-  var dxdt = 1.0 / 6.0 * (a.dx + 2.0 * (b.dx + c.dx) + d.dx);
-  var dvdt = 1.0 / 6.0 * (a.dv + 2.0 * (b.dv + c.dv) + d.dv);
-
-  state.x = state.x + dxdt * dt;
-  state.v = state.v + dvdt * dt;t;
-  return state;
-}
-
-var s = new State(1,1);
-console.log(integrate(s, 1, 1));
-
-
 
 // input test
 document.addEventListener('mousedown', function () {
@@ -130,22 +92,34 @@ document.addEventListener('mousedown', function () {
 }, false);
 
 var geometry = new THREE.Geometry();
+//geometry.vertices.push(spring.a.position, spring.b.position);
 var mesh = new THREE.Line(geometry, material);
+var circleAGeometry = new THREE.CircleGeometry(5,6);
+var circleBGeometry = new THREE.CircleGeometry(5,6);
+circleAGeometry.verticesNeedUpdate = true;
+circleBGeometry.verticesNeedUpdate = true;
+var circleA = new THREE.Mesh(circleAGeometry, material);
+var circleB = new THREE.Mesh(circleBGeometry, material);
 
 // rendering
 var clock = new THREE.Clock(true);
 var render = function () {
-  var dt = clock.getDelta();
-  var f = elasticity(spring.a, spring.b, 0.5, 0.9, dt);
-  spring.a.acceleration.add(f);
-  //console.log(f);
+  //var dt = clock.getDelta();
+  var dt = 0.001;
+  var f = hookeForce(spring.a, spring.b, 500, 0.9, dt);
+  spring.a.acceleration.multiplyScalar(f /spring.a.mass);
+  console.log(f);
   //updateVelocityAndPosition(spring.a, dt);
   verlet(spring.a, dt);
   verlet(spring.b, dt);
   geometry.vertices = [];
   geometry.vertices.push(spring.a.position, spring.b.position);
   geometry.verticesNeedUpdate = true;
+  circleA.position.copy(spring.a.position);
+  circleB.position.copy(spring.b.position);
   scene.add( mesh );
+  scene.add(circleA);
+  scene.add(circleB);
 
   requestAnimationFrame( render );
 	renderer.render( scene, camera );

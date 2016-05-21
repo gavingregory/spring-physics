@@ -6,7 +6,9 @@ An implementation of simple physics, written in Javascript and rendered using th
 * Sphere/sphere collision response (using the impulse method).
 * Spring physics using Hooke's law (needs work!).
 
+
 # Getting Started
+
 
 ## Prerequisites
 This application requires bower and browserify. Obtain them via npm.
@@ -16,6 +18,7 @@ From terminal, type:
 (sudo) npm install -g browserify bower
 ```
 
+
 ## Building
 From terminal (within the project root directory), type:
 ```bash
@@ -23,18 +26,13 @@ bower install
 cd js
 browserify main.js -o bundle.js
 ```
+This will install all dependencies and build the bundle.js script using browserify.
 
 ## Running
 Host the page using whichever HTTP server you prefer. A simple method is (within the project root directory):
 ```bash
 (sudo) npm install -g http-server
 http-server -c-1
-```
-
-
-Ensure that you have bower installed on your machine, then type the following into the terminal (in the project root path):
-```bash
-bower install
 ```
 
 

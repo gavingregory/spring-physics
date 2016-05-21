@@ -14,6 +14,7 @@ var Entity = function (position, mass) {
 
   // rendering stuff
   this.radius = 5;
+  this.radius2 = this.radius * this.radius;
   this.triangles = 32;
   this.material = new THREE.MeshBasicMaterial( { color: 0x111199 } );
   this.geometry = new THREE.CircleGeometry(this.radius, this.triangles);

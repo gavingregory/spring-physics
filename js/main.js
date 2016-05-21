@@ -21,6 +21,7 @@ camera.position.z = 50;
 
 var updateVelocity = function (v, a, dt) {
   v.add(a.clone().multiplyScalar(dt));
+  v.multiplyScalar(0.99); // damping
 }
 
 var updatePosition = function (s, v, dt) {
@@ -34,6 +35,14 @@ var semiImplicitEuler = function (s,v,a,dt) {
 
 var updateCircle = function (c, dt) {
   semiImplicitEuler(c.position, c.velocity, c.acceleration, dt);
+}
+
+var collisionCheckCircle = function (c1, c2) {
+  var d2 = Math.pow(c2.position.x - c1.position.x, 2) +
+           Math.pow(c2.position.y - c1.position.y, 2) +
+           Math.pow(c2.position.z - c1.position.z, 2);
+  if (Math.pow(c1.radius + c2.radius, 2) < d2) return false;
+  else return true;
 }
 
 var verlet = function (e, dt) {
@@ -62,25 +71,24 @@ var elasticity = function (a, b, k, c, dt) {
 
 // input test
 document.addEventListener('mousedown', function () {
-  circle.acceleration.add(new THREE.Vector3(1,0,0));
-  console.log(circle.acceleration);
-  //spring.a.acceleration = spring.a.acceleration.add(new THREE.Vector3(1,0,0));
+  circle.velocity.add(new THREE.Vector3(1,0,0));
 }, false);
 
-// var geometry = new THREE.Geometry();
-// var mesh = new THREE.Line(geometry, material);
-
-
-var circle = new Entity(new THREE.Vector3(0,0,1), new THREE.Vector3(0,1,0));
+var circle = new Entity(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0));
+var circle2 = new Entity(new THREE.Vector3(25,0,0), new THREE.Vector3(0,0,0));
 scene.add(circle.mesh);
+scene.add(circle2.mesh);
 
 // rendering
 var clock = new THREE.Clock(true);
 var render = function () {
   var dt = clock.getDelta();
   updateCircle(circle, dt);
+  updateCircle(circle2, dt);
   circle.mesh.position.copy(circle.position);
-  circle.geometry.verticesNeedUpdate = true;
+  circle2.mesh.position.copy(circle2.position);
+  var result = collisionCheckCircle(circle, circle2);
+  if (result) console.log(result);
   scene.add(circle.mesh);
   requestAnimationFrame( render );
 	renderer.render( scene, camera );

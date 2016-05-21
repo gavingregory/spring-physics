@@ -7,6 +7,7 @@
 var Entity = function (position, mass) {
   if (position) this.position = position; else this.position = new THREE.Vector3();
   if (mass) this.mass = mass; else this.mass = 0.5;
+  this.inverse_mass = 1 / this.mass;
   this.acceleration = new THREE.Vector3(0, -9.81 * mass, 0);
   this.velocity = new THREE.Vector3();
   this.lposition = this.position.clone();

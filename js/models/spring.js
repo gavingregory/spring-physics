@@ -11,6 +11,13 @@ var Spring = function (a, b, resistance, length) {
   this.b = b;
   this.resistance = resistance;
   this.length = length;
+
+  // rendering stuff
+  this.material = new THREE.LineBasicMaterial( { color: 0x2194ce } );
+  this.geometry = new THREE.Geometry();
+  this.geometry.vertices.push(a.position,b.position);
+  this.geometry.verticesNeedUpdate = true;
+  this.mesh = new THREE.Line(this.geometry, this.material);
 };
 
 module.exports = Spring;

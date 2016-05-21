@@ -16,9 +16,12 @@ var Entity = function (position, mass) {
   // rendering stuff
   this.radius = 5;
   this.radius2 = this.radius * this.radius;
-  this.triangles = 32;
-  this.material = new THREE.MeshBasicMaterial( { color: 0x111199 } );
-  this.geometry = new THREE.CircleGeometry(this.radius, this.triangles);
+  this.widthSegments = 16;
+  this.heightSegments = 8;
+  this.material = new THREE.MeshLambertMaterial( { color: 0x2194ce } );
+  this.material.wireframe = true;
+  this.material.wireframeLinewidth = 3;
+  this.geometry = new THREE.SphereGeometry(this.radius, this.widthSegments, this.heightSegments);
   this.geometry.verticesNeedUpdate = true;
   this.mesh = new THREE.Mesh(this.geometry, this.material);
 };

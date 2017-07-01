@@ -6,6 +6,8 @@ An (very rough, work in progress) implementation of simple physics, written in J
 * Sphere/sphere collision response (using the impulse method).
 * Spring physics using Hooke's law (needs work!).
 
+![collision_physics](https://user-images.githubusercontent.com/8677029/27762354-796b8218-5e3e-11e7-9311-93b6502fd27d.png)
+
 
 # Getting Started
 

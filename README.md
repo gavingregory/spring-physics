@@ -1,7 +1,7 @@
 # spring-physics
 
-An implementation of simple physics, written in Javascript and rendered using three.js. The physics currently implemented: 
-* Semi-implicit Euler integration. 
+An (very rough, work in progress) implementation of simple physics, written in Javascript and rendered using three.js. The physics currently implemented: 
+* Semi-implicit Euler integration.
 * Sphere/sphere collision detection.
 * Sphere/sphere collision response (using the impulse method).
 * Spring physics using Hooke's law (needs work!).
